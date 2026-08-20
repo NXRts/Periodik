@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tabel Periodik Unsur Kimia Interaktif</title>
+  <meta name="description" content="Aplikasi Tabel Periodik Unsur Kimia Interaktif 118 unsur lengkap dengan visualisasi Atom Bohr 2D, filter, komparasi, dan kuis edukasi.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header>
+      <div class="brand">
+        <div class="brand-icon">⚛</div>
+        <div class="brand-title">
+          <h1>Tabel Periodik Unsur</h1>
+          <p>Eksplorasi 118 Unsur Kimia & Visualisasi Atom Interaktif</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button id="btnCompareToggle" class="btn" onclick="toggleCompareMode()">
+          <span>⚖</span> Bandingkan Unsur (<span id="compareCount">0</span>)
+        </button>
+        <button id="btnStartQuiz" class="btn btn-accent" onclick="startQuiz()">
+          <span>🎮</span> Kuis Interaktif
+        </button>
+      </div>
+    </header>
+
+    <!-- Panel Kontrol (Pencarian & Filter) -->
+    <div class="controls-panel">
+      <div class="search-row">
+        <!-- Search Input -->
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" placeholder="Cari nama unsur, simbol, atau nomor atom (cth: Fe, Oksigen, 26)..." oninput="handleSearchFilter()">
+        </div>
+
+        <!-- Mode Tampilan (Heatmap) -->
+        <div class="view-mode-group">
+          <button class="view-btn active" data-view="category" onclick="setViewMode('category')">Kategori</button>
+          <button class="view-btn" data-view="electronegativity" onclick="setViewMode('electronegativity')">Elektronegativitas</button>
+          <button class="view-btn" data-view="mass" onclick="setViewMode('mass')">Massa Atom</button>
+          <button class="view-btn" data-view="state" onclick="setViewMode('state')">Wujud Zat</button>
+        </div>
+      </div>
+
+      <!-- Filter Kategori Unsur -->
+      <div class="filter-pills" id="categoryFilterContainer">
+        <div class="pill active" data-category="all" onclick="filterCategory('all')">
+          Semua Kategori
+        </div>
+        <div class="pill" data-category="alkali-metal" onclick="filterCategory('alkali-metal')">
+          <span class="pill-dot dot-alkali-metal"></span> Logam Alkali
+        </div>
+        <div class="pill" data-category="alkaline-earth" onclick="filterCategory('alkaline-earth')">
+          <span class="pill-dot dot-alkaline-earth"></span> Alkali Tanah
+        </div>
+        <div class="pill" data-category="transition-metal" onclick="filterCategory('transition-metal')">
+          <span class="pill-dot dot-transition-metal"></span> Logam Transisi
+        </div>
+        <div class="pill" data-category="post-transition" onclick="filterCategory('post-transition')">
+          <span class="pill-dot dot-post-transition"></span> Pasca-Transisi
+        </div>
+        <div class="pill" data-category="metalloid" onclick="filterCategory('metalloid')">
+          <span class="pill-dot dot-metalloid"></span> Metaloid
+        </div>
+        <div class="pill" data-category="nonmetal" onclick="filterCategory('nonmetal')">
+          <span class="pill-dot dot-nonmetal"></span> Non-logam
+        </div>
+        <div class="pill" data-category="halogen" onclick="filterCategory('halogen')">
+          <span class="pill-dot dot-halogen"></span> Halogen
+        </div>
+        <div class="pill" data-category="noble-gas" onclick="filterCategory('noble-gas')">
+          <span class="pill-dot dot-noble-gas"></span> Gas Mulia
+        </div>
+        <div class="pill" data-category="lanthanide" onclick="filterCategory('lanthanide')">
+          <span class="pill-dot dot-lanthanide"></span> Lantanida
+        </div>
+        <div class="pill" data-category="actinide" onclick="filterCategory('actinide')">
+          <span class="pill-dot dot-actinide"></span> Aktinida
+        </div>
+      </div>
+    </div>
+
+    <!-- Grid Utama Tabel Periodik -->
+    <div class="periodic-wrapper">
+      <div class="periodic-table" id="periodicTable">
+        <!-- Generasi via App JS -->
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <p>Tabel Periodik Unsur Kimia Interaktif &copy; 2026 • Dibuat untuk Edukasi Sains</p>
+    </footer>
+  </div>
+
+  <!-- Modal Detail Unsur (<dialog>) -->
+  <dialog id="elementModal" class="element-modal">
+    <div class="modal-content" id="modalContent">
+      <!-- Diberikan via JavaScript saat unsur diklik -->
+    </div>
+  </dialog>
+
+  <!-- Tray Komparasi Unsur Floating -->
+  <div class="compare-tray" id="compareTray">
+    <span>Unsur Terpilih:</span>
+    <div class="compare-items" id="compareItems"></div>
+    <button class="btn btn-primary" onclick="openCompareModal()">Bandingkan Sekarang</button>
+    <button class="btn" onclick="clearCompareSelection()">Batal</button>
+  </div>
+
+  <!-- Modal Hasil Komparasi (<dialog>) -->
+  <dialog id="compareModal" class="element-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>⚖ Komparasi Unsur Kimia</h2>
+        <button class="close-btn" onclick="closeCompareModal()">✕</button>
+      </div>
+      <div class="modal-body" style="grid-template-columns: 1fr;">
+        <div class="compare-table-wrapper" id="compareTableWrapper">
+          <!-- Tabel Komparasi via JS -->
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Overlay Kuis Interaktif -->
+  <div class="quiz-overlay" id="quizOverlay">
+    <div class="quiz-card">
+      <div class="quiz-header">
+        <h2>🎮 Kuis Pengetahuan Unsur</h2>
+        <div class="quiz-score-badge">Skor: <span id="quizScore">0</span></div>
+        <button class="close-btn" onclick="closeQuiz()">✕</button>
+      </div>
+
+      <div class="quiz-question-box">
+        <h3 id="quizQuestion">Tebak simbol untuk unsur berikut:</h3>
+        <div class="quiz-prompt" id="quizPrompt">Oksigen</div>
+      </div>
+
+      <div class="quiz-options" id="quizOptions">
+        <!-- Opsi Jawaban via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Script Load Data dan Aplikasi -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
